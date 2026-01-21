@@ -1,0 +1,29 @@
+node("master"){
+    stage("clone"){
+        git branch:'main', url:'https://github.com/vbaska3001/Cover-Song-App_Jenkins.git'
+    }
+    stage("npm"){
+        sh "npm ci"
+    }
+    stage("build"){
+        sh "docker build -t vignesh3001/nodejs-app ."
+    }
+    stage("login push"){
+        sh "docker login -u vignesh3001 -p Vignesh@3001"
+        sh "docker push vignesh3001/nodejs-app"
+    }
+}
+
+node("Slave"){
+    stage("login pull"){
+        sh "docker login -u vignesh3001 -p Vignesh@3001"
+        sh "sudo chmod 777 /var/run/docker.sock"
+        sh "docker pull vignesh3001/nodejs-app"
+    }
+    stage("delete old container"){
+        sh "docker rm cover-song-app"
+    }
+    stage("run"){
+        sh "docker run -d --name cover-song-app -p 3000:3000 vignesh3001/nodejs-app"
+    }
+}
